@@ -29,11 +29,28 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, onMounted } from "vue";
+import { defineComponent, reactive, onMounted,ref } from "vue";
 import { timestampToTime } from "../utils/utils";
 import { ParamsArchive, ArchiveData } from "../types/index";
 import service from "../utils/https";
 import urls from "../utils/urls";
+
+//#region 定义响应式数据
+const isLoadEnd = ref(false)
+const isLoading = ref(false)
+const articlesList = ref<Array<any>>([])
+const total = ref(0)
+const params = ref<ParamsArchive >({
+  keyword: "",
+  likes: "", // 是否是热门文章
+  state: 1, // 文章发布状态 => 0 草稿，1 已发布,'' 代表所有文章
+  article: 1,
+  tag_id: "",
+  category_id: "",
+  pageNum: 1,
+  pageSize: 10,
+})
+//#endregion
 
 export default defineComponent({
   name: "Archive",

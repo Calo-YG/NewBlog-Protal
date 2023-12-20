@@ -1,48 +1,31 @@
-
 <template>
   <div>
-    <i
-      v-show="isShowBtn"
-      @click="topFunction"
-      class="el-icon-arrow-up"
-    ></i>
+    <i v-show="isShowBtn" @click="topFunction" class="el-icon-arrow-up"></i>
   </div>
 </template>
-<script lang="ts">
-import { defineComponent, reactive, onMounted } from "vue";
+<script lang="ts" setup>
+import { defineComponent, ref, onMounted } from "vue";
 
-export default defineComponent({
-  name: "ArrowUp",
-  setup() {
-    const state = reactive({
-      isShowBtn: false,
-    });
+const isShowBtn = ref(false);
 
-    onMounted(() => {
-      // 当网页向下滑动 20px 出现"返回顶部" 按钮
-      window.onscroll = (): void => {
-        if (
-          window.document.body.scrollTop > 100 ||
-          window.document.documentElement.scrollTop > 100
-        ) {
-          state.isShowBtn = true;
-        } else {
-          state.isShowBtn = false;
-        }
-      };
-    });
-
-    const topFunction = (): void => {
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
+onMounted(() => {
+  // 当网页向下滑动 20px 出现"返回顶部" 按钮
+  window.onscroll = (): void => {
+    if (
+      window.document.body.scrollTop > 100 ||
+      window.document.documentElement.scrollTop > 100
+    ) {
+      isShowBtn.value = true;
+    } else {
+      isShowBtn.value = false;
     }
-
-    return {
-      state,
-      topFunction
-    };
-  },
+  };
 });
+
+const topFunction = (): void => {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+};
 </script>
 <style scoped>
 .el-icon-arrow-up {
@@ -63,4 +46,3 @@ export default defineComponent({
   background-color: #555;
 }
 </style>
-

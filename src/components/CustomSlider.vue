@@ -1,41 +1,41 @@
 <template>
   <div class="right slider">
-    <img
-      class="right-logo"
-      src="../assets/userLogo.jpeg"
-      alt=""
-    >
+    <img class="right-logo" src="../assets/userLogo.jpeg" alt="" />
     <div class="title">夜尽天明</div>
     <div class="right-content">
-      <!-- <div class="item">
-        <div class="num">123</div>粉丝
+      <div class="item">
+        <div class="num">123</div>
+        粉丝
       </div>
       <div class="item">
-        <div class="num">123</div>文章
+        <div class="num">123</div>
+        文章
       </div>
       <div class="item">
-        <div class="num">123</div>字数
+        <div class="num">123</div>
+        字数
       </div>
       <div class="item">
-        <div class="num">123</div>收获喜欢
-      </div> -->
+        <div class="num">123</div>
+        收获喜欢
+      </div>
     </div>
     <div class="tags">
       <div class="title">标签云</div>
       <router-link
-        v-for="item in state.list"
+        v-for="item in list"
         class="item"
         :key="item._id"
         :to="`/articles?tag_id=${item._id}&tag_name=${item.name}&category_id=`"
       >
-        <span :key="item._id">{{item.name}}</span>
+        <span :key="item._id">{{ item.name }}</span>
       </router-link>
     </div>
     <div class="introduce">
       <div class="title">技术以内的 BB</div>
       <div class="content">
         <img
-          style="width:100%;"
+          style="width: 100%"
           src="../assets/BiaoChenXuYing.png"
           alt="全栈修炼"
         />
@@ -45,7 +45,7 @@
       <div class="title">开源项目的 BB</div>
       <div class="content">
         <img
-          style="width:100%;"
+          style="width: 100%"
           src="../assets/FrontEndGitHub.png"
           alt="前端GitHub"
         />
@@ -54,50 +54,41 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Params, TagsData } from "../types/index";
-import { defineComponent, reactive, onMounted } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import service from "../utils/https";
 import urls from "../utils/urls";
 
-export default defineComponent({
-  name: "CustomSlider",
-  setup(props, context) {
-    const state = reactive({
-      isLoadEnd: false,
-      isLoading: false,
-      list: [] as Array<any>,
-      total: 0,
-      params: {
-        keyword: "",
-        pageNum: 1,
-        pageSize: 100,
-      } as Params,
-    });
+//#region
+const isLoadEnd = ref(false);
+const isLoading = ref(false);
+const list = ref<Array<any>>([]);
+const total = ref(0);
+const params = ref<Params>({
+  keyword: "",
+  pageNum: 1,
+  pageSize: 100,
+});
+//#endregion
 
-    const handleSearch = async (): Promise<void> => {
-      state.isLoading = true;
-      const data: TagsData = await service.get(urls.getTagList, {
-        params: state.params,
-      });
-      state.isLoading = false;
+const handleSearch = async (): Promise<void> => {
+  isLoading.value = true;
+  const data: TagsData =await  service.get(urls.getTagList, {
+    params: params,
+  });
+  isLoading.value = false;
 
-      state.list = [...state.list, ...data.list];
-      state.total = data.count;
-      state.params.pageNum++;
-      if (state.total === state.list.length) {
-        state.isLoadEnd = true;
-      }
-    };
-
-    onMounted(() => {
-      handleSearch();
-    });
-
-    return {
-      state,
-    };
+  list.value = [...list.value, ...data.list];
+  total.value = data.count;
+  params.value.pageNum++;
+  if (total.value === list.value.length) {
+    isLoadEnd.value = true;
   }
+};
+
+onMounted(() => {
+  handleSearch();
 });
 </script>
 

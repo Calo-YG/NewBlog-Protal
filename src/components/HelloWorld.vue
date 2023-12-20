@@ -13,28 +13,22 @@
   <p>{{ count }}</p>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { defineComponent, computed } from 'vue'
 import { useStore } from 'vuex'
 import { key } from '../store'
 
-export default defineComponent({
-  name: 'HelloWorld',
-  props: {
-    msg: {
-      type: String,
-      default: 'Hello Vue 3 + TypeScript + Vite'
-    }
-  },
-  setup() {
-    const store = useStore(key)
-
-    const count = computed(() => store.state.count)
-
-    return {
-      count,
-      inCrement: () => store.commit('increment')
-    }
+const props= defineProps({
+  msg: {
+    type: String,
+    default: 'Hello Vue 3 + TypeScript + Vite'
   }
 })
+
+const store = useStore(key)
+
+const count = computed(() => store.state.count)
+
+const inCrement= ()=>store.commit('increment')
+
 </script>

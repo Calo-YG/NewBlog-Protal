@@ -1,14 +1,9 @@
-
 <template>
   <div class="comment-list">
     <div class="top-title">
-      <span>{{numbers}} 条评论</span>
+      <span>{{ numbers }} 条评论</span>
     </div>
-    <div
-      v-for="(item, i) in list"
-      :key="item._id"
-      class="item"
-    >
+    <div v-for="(item, i) in list" :key="item._id" class="item">
       <div class="item-header">
         <div class="author">
           <div class="avatar">
@@ -16,38 +11,27 @@
               v-if="item.user.avatar.length < 10"
               src="../assets/user.png"
               alt="默认图片"
-            >
-            <img
-              v-else
-              :src="item.user.avatar"
-              alt=""
-            >
+            />
+            <img v-else :src="item.user.avatar" alt="" />
           </div>
         </div>
         <div class="info">
           <div class="name">
-            {{item.user.name}}
-            {{item.user.type === 0 ? '(作者)' : ''}}
+            {{ item.user.name }}
+            {{ item.user.type === 0 ? "(作者)" : "" }}
           </div>
           <div class="time">
-            {{formatTime(item.create_time)}}
+            {{ formatTime(item.create_time) }}
           </div>
         </div>
       </div>
-      <div class="comment-detail">{{item.content}}</div>
+      <div class="comment-detail">{{ item.content }}</div>
       <div class="item-comment">
-        <div
-          @click="showCommentModal(item._id, item.user)"
-          class="message"
-        >
+        <div @click="showCommentModal(item._id, item.user)" class="message">
           <el-button size="small">回复</el-button>
         </div>
       </div>
-      <div
-        v-for="e in item.other_comments"
-        :key="e._id"
-        class="item-other"
-      >
+      <div v-for="e in item.other_comments" :key="e._id" class="item-other">
         <div class="item-header">
           <div class="author">
             <div class="avatar">
@@ -55,133 +39,116 @@
                 v-if="e.user.avatar.length < 10"
                 src="../assets/user.png"
                 alt="默认图片"
-              >
-              <img
-                v-else
-                :src="e.user.avatar"
-                alt=""
-              >
+              />
+              <img v-else :src="e.user.avatar" alt="" />
             </div>
           </div>
           <div class="info">
             <div class="name">
-              {{e.user.name}}
-              {{e.user.type === 0 ? '(作者)' : ''}}
+              {{ e.user.name }}
+              {{ e.user.type === 0 ? "(作者)" : "" }}
             </div>
             <div class="time">
-              {{formatTime(e.create_time)}}
+              {{ formatTime(e.create_time) }}
             </div>
           </div>
         </div>
         <div class="comment-detail">
-          {{'@' + e.to_user.name}}
-          {{e.to_user.type === 0 ? '(作者)' : ''}}：{{e.content}}
+          {{ "@" + e.to_user.name }}
+          {{ e.to_user.type === 0 ? "(作者)" : "" }}：{{ e.content }}
         </div>
         <div class="item-comment">
           <div class="message">
             <el-button
               @click="showCommentModal(item._id, item.user, e.user)"
               size="small"
-            >回复</el-button>
+              >回复</el-button
+            >
           </div>
         </div>
       </div>
     </div>
     <Comment
-      :visible="state.visible"
-      :to_user="state.to_user"
-      :comment_id="state.comment_id"
+      :visible="visible"
+      :to_user="to_user"
+      :comment_id="comment_id"
       :article_id="article_id"
       @ok="handleOk"
       @cancel="handleCancel"
     />
   </div>
 </template>
-<script lang="ts">
+<script lang="ts" setup>
 import { ElMessage } from "element-plus";
-import { defineComponent, defineAsyncComponent, reactive } from "vue";
+import { defineComponent, defineAsyncComponent, ref } from "vue";
 import { timestampToTime } from "../utils/utils";
 import { ToUser } from "../types/index";
 
-export default defineComponent({
-  name: "CommentList",
-  components: {
-    Comment: defineAsyncComponent(() => import("./Comment.vue")),
+//#region 定义props
+const props = defineProps({
+  list: {
+    // type: Array<never>,
+    default: [] as any,
   },
-  props: {
-    list: {
-      // type: Array<never>,
-      default: [] as any,
-    },
-    numbers: {
-      type: Number,
-      default: 0,
-    },
-    article_id: {
-      type: String,
-      default: "",
-    },
+  numbers: {
+    type: Number,
+    default: 0,
   },
-  setup(props, context) {
-    const state = reactive({
-      visible: false,
-      comment_id: "",
-      to_user: {
-        user_id: "",
-        name: "",
-        avatar: "",
-        type: 0,
-      }
-    });
-
-    const formatTime = (value: string | Date): string => {
-      return timestampToTime(value, true);
-    };
-
-    const handleCancel = (): void => {
-      state.visible = false;
-    };
-
-    const handleOk = (): void => {
-      state.visible = false;
-      context.emit("refreshArticle");
-    };
-
-    // 添加评论
-    const showCommentModal = (
-      commitId: string,
-      user: ToUser,
-      secondUser?: ToUser
-    ): boolean | void => {
-      if (!window.sessionStorage.userInfo) {
-        ElMessage({
-          message: "登录才能点赞，请先登录！",
-          type: "warning",
-        });
-        return false;
-      }
-      // 添加三级评论
-      if (secondUser) {
-        state.visible = true;
-        state.comment_id = commitId;
-        state.to_user = user;
-      } else {
-        // 添加二级评论
-        state.visible = true;
-        state.comment_id = commitId;
-        state.to_user = user;
-      }
-    };
-
-    return {
-      state,
-      showCommentModal,
-      handleOk,
-      handleCancel,
-      formatTime,
-    };
+  article_id: {
+    type: String,
+    default: "",
   },
 });
+//#endregion
+
+//#region 定义响应式数据
+const visible = ref(false);
+const comment_id = ref("");
+const to_user = ref({
+  user_id: "",
+  name: "",
+  avatar: "",
+  type: 0,
+});
+//#endregion
+const formatTime = (value: string | Date): string => {
+  return timestampToTime(value, true);
+};
+
+const handleCancel = (): void => {
+  visible.value = false;
+};
+
+const handleOk = (): void => {
+  visible.value = false;
+  //context.emit("refreshArticle");
+};
+
+// 添加评论
+const showCommentModal = (
+  commitId: string,
+  user: ToUser,
+  secondUser?: ToUser
+): boolean | void => {
+  if (!window.sessionStorage.userInfo) {
+    ElMessage({
+      message: "登录才能点赞，请先登录！",
+      type: "warning",
+    });
+    return false;
+  }
+  // 添加三级评论
+  if (secondUser) {
+    visible.value = true;
+    comment_id.value = commitId;
+    to_user.value = user;
+  } else {
+    // 添加二级评论
+    visible.value = true;
+    comment_id.value = commitId;
+    to_user.value = user;
+  }
+};
 </script>
 <style lang="less" scoped>
 .comment-list {
@@ -304,4 +271,3 @@ export default defineComponent({
   }
 }
 </style>
-
